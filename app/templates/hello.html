@@ -2,13 +2,36 @@
 {% block body %}
  
 <div class="block1">
-<h1>Hello {{ request.form['username'] }}!</h1>
+<h1>Hello {{ user }}!</h1>
   <h2>Here is an interesting quote for you: </h2>
   <p>
 {{quote}}
   </p>
   </p>
 <img src="/static/assets/blue_green_red_book.png">
+
+  <form method="POST">
+    <div class="form-group">
+      <label>pinjam yang mana hayo?</label>
+      <select class="form-control" name="bukupinjam">
+        {% for buku in bukus %}
+        <option value="{{ buku.idbuku }}">{{ buku.judul_buku }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Lama Pinjam : </label>
+      <select class="form-control" name="durasi">
+        <option value="1">1 Hari</option>
+        <option value="2">2 Hari</option>
+        <option value="3">3 Hari</option>
+        <option value="4">4 Hari</option>
+        </select>
+      </div>
+    <div class="form-group">
+      <input class="form-control btn btn-success" type="submit" name="login" value="Pinjam!"></input>
+    </div>
+  </form>
   <a href='/logout'>Logout</a>
 
 </div>
