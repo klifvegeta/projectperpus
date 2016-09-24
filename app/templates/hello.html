@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
- 
-<div class="block1">
-<h1>Hello {{ user }}!</h1>
+
+<div class="login-screen">
+  <div class="block1">
+<h1>Hello {{ request.form['username'] }}!</h1>
   <h2>Here is an interesting quote for you: </h2>
   <p>
 {{quote}}
@@ -12,7 +13,7 @@
 
   <form method="POST">
     <div class="form-group">
-      <label>pinjam yang mana hayo?</label>
+      <label>Pilih buku:</label>
       <select class="form-control" name="bukupinjam">
         {% for buku in bukus %}
         <option value="{{ buku.idbuku }}">{{ buku.judul_buku }}</option>
@@ -33,6 +34,6 @@
     </div>
   </form>
   <a href='/logout'>Logout</a>
-
+    </div>
 </div>
 {% endblock %}

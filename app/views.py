@@ -1,51 +1,31 @@
-from flask import render_template, request,flash, abort
+from flask import render_template, request, flash, abort
 from flask import redirect, url_for, session
-from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from main import app
 from forms import *
+from sqlalchemy.orm import sessionmaker
 from models import *
+from flask_login import LoginManager, login_required, login_user, logout_user
 from datetime import datetime
 from config import Config
 from random import randint
 import os
+import md5
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "/login"
+login_manager.login_view = '/login'
 
 @login_manager.user_loader
-def load_user(userid):
-    return User(userid)
+def load_user(id):
+    return User.query.get(id)
+def hash_string(string):
+    """
+    Return the md5 hash of a (string+salt)
+    """
+    salted_hash = string + app.config['SECRET_KEY']
+    return md5.new(salted_hash).hexdigest()
 
-"""
-  @login_manager.user_loader
-  def user_loader(user):
-    user = User.query.filter_by(username=user).first()
-    if user != True:
-        return "User tidak ditemukan"
-    user = User()
-    #user.id = email
-    return user
-
-
-  @login_manager.request_loader
-  def request_loader(request):
-    username = request.form.get('username')
-    user = User.query.filter_by(username=username).first()
-    if not user:
-        return "Gagal"
-
-    user = User()
-    #user.id = email
-
-    # DO NOT ever store passwords in plaintext and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['password'] == user.password
-
-    return user
-"""
-
-@app.route('/')
+@app.route('/', methods=['GET','POST'] )
 def home():
     quotes = [ "'If people do not believe that mathematics is simple, it is only because they do not realize how complicated life is.' -- John Louis von Neumann ",
                "'Computer science is no more about computers than astronomy is about telescopes' --  Edsger Dijkstra ",
@@ -62,31 +42,25 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get('username') != None:
-        return redirect(url_for('home'))
 
-    if request.method == 'POST':
-       username = request.form["username"]
-       password = request.form["password"]
-       user = User.query.filter_by(username=username).first()
+    POST_USERNAME = str(request.form['username'])
+    POST_PASSWORD = str(request.form['password'])
 
-       if user:
-          if password == user.password:
-            #set session
-            session['username'] = username
-            loguser = User(user.uid)
-            login_user(loguser)
-            return redirect(request.args.get("next"))
-          else:
-            return "Password Salah"
-       else:
-          return "{} belum terdaftar".format(username)
+    Session = sessionmaker(bind=engine)
+    s = Session()
+    query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]))
+    result = query.first()
+    if result:
+        session['logged_in'] = True
+    else:
+        flash('wrong password!')
     return home()
 
-@app.route("/logout")
+@app.route('/logout')
 def logout():
     session['logged_in'] = False
     return home()
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
      if request.method == 'POST':
@@ -114,19 +88,21 @@ def signup():
                 user.lastname = "Lastname"
                 db.session.add(user)
                 db.session.commit()
-                return "berhasil"
+                flash("berhasil")
+
 
         else:
             return render_template('signup2.html', form = form, page_title = 'Daftar')
      return render_template('signup2.html', form = SignupForm(), page_title = 'Daftar')
+
 @app.route('/pinjam/', methods=['GET','POST'])
-@login_required
-def transaksi():
+def pinjam():
     # Cek Session login
     #if session.get('username') != None:
         # Cek method
         if request.method == "POST":
             bukupinjam = request.form['bukupinjam']
+            durasi = int(request.form['durasi'])
             buku = Buku.query.filter_by(idbuku=bukupinjam).first()
             # Jika buku di temukan
             if buku:
@@ -162,3 +138,4 @@ def transaksi():
 
     #else:
     #   return redirect(url_for('login'))
+

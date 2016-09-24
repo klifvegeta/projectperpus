@@ -14,3 +14,14 @@ class SignupForm(Form):
             ])
     username = TextField('Username', validators=[Required()])
     agree = BooleanField('I agree all your <a href="/static/tos.html">Terms of Services</a>', validators=[Required(u'You must accept our Terms of Service')])
+
+class LoginForm(Form):
+    username = TextField('username', validators=[
+        Required(),
+        validators.Length(min=3, message=(u'your username must be a minimum of 3'))
+    ])
+    password = PasswordField('password', validators=[
+        Required(),
+        validators.Length(min=6, message=(u'please give a longer password'))
+    ])
+    remember_me = BooleanField('remember me', default=False)

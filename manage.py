@@ -1,9 +1,16 @@
-from main import db
-from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 
-engine = create_engine('postgresql://localhost:5432/perpustakaan', echo=True)
-Base = declarative_base()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/perpustakaan'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -43,7 +50,7 @@ class User(db.Model):
 
 
 class Buku(db.Model):
-    __tablename__ = 'buku'
+    ___tablename__ = 'buku'
     idbuku = db.Column(db.Integer, primary_key=True)
     judul_buku = db.Column(db.String(100))
     penulis_buku = db.Column(db.String(50))
@@ -65,3 +72,6 @@ class Transaksi(db.Model):
         self.idbuku = idbuku
         self.tglpinjam = tglpinjam
         self.durasi = durasi
+
+if __name__ == '__main__':
+    manager.run()
