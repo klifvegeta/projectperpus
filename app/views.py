@@ -39,6 +39,7 @@ def home():
         return render_template('login.html')
     else:
         return render_template('hello.html', **locals())
+#percobaan git gnome
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
